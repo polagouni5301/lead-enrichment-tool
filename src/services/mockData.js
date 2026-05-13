@@ -1,12 +1,10 @@
-import type { Lead } from '../types/lead'
-
 const now = new Date('2026-05-12T10:30:00.000Z')
 
-function iso(minutesAgo: number) {
+function iso(minutesAgo) {
   return new Date(now.getTime() - minutesAgo * 60_000).toISOString()
 }
 
-export const sampleLeads: Lead[] = [
+export const sampleLeads = [
   {
     id: 'lead_lumora',
     date: '2026-05-12',

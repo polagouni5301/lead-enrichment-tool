@@ -1,6 +1,6 @@
 import { cn } from '../../utils/cn'
 
-export function Skeleton({ className }: { className?: string }) {
+export function Skeleton({ className }) {
   return (
     <div
       className={cn(

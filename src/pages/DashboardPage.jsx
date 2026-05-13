@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Activity, BarChart3, Clock3, DatabaseZap, Download, Filter, RefreshCw, Trophy, Users, type LucideIcon } from 'lucide-react'
+import { Activity, Clock3, DatabaseZap, Download, Filter, RefreshCw, Trophy, Users } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import {
   Bar,
@@ -24,19 +24,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Progress } from '../components/ui/progress'
 import { exportDashboardReport } from '../services/exportService'
 import { useLeadStore } from '../store/useLeadStore'
-import type { DashboardMetrics, Lead } from '../types/lead'
 import { formatPercent } from '../utils/format'
 
 const colors = ['#FD4E59', '#FFAB28', '#0EA5E9', '#10B981', '#6D7069']
 
-type KpiCard = {
-  label: string
-  value: number
-  Icon: LucideIcon
-  tone: 'info' | 'coral' | 'danger' | 'success'
-}
-
-function computeFilteredMetrics(leads: Lead[]): DashboardMetrics {
+function computeFilteredMetrics(leads) {
   const processed = leads.filter((lead) => lead.status !== 'Uploaded').length
   const dropped = leads.filter((lead) => lead.status.includes('Failed')).length
   const enriched = leads.filter((lead) => lead.status === 'Enrichment Complete' || lead.status === 'Exported').length
@@ -198,15 +190,15 @@ export function DashboardPage() {
               ['industry', 'Industry', industry, setIndustry, industries],
               ['status', 'Validation status', status, setStatus, statuses],
             ].map(([id, label, value, setter, options]) => (
-              <div className="space-y-2" key={String(id)}>
-                <label className="text-xs font-bold uppercase text-brand-gray" htmlFor={String(id)}>{String(label)}</label>
+              <div className="space-y-2" key={id}>
+                <label className="text-xs font-bold uppercase text-brand-gray" htmlFor={id}>{label}</label>
                 <select
-                  id={String(id)}
-                  value={String(value)}
-                  onChange={(event) => (setter as (value: string) => void)(event.target.value)}
+                  id={id}
+                  value={value}
+                  onChange={(event) => setter(event.target.value)}
                   className="h-11 w-full rounded-2xl border border-black/10 bg-white px-3 text-sm font-semibold"
                 >
-                  {(options as string[]).map((option) => (
+                  {options.map((option) => (
                     <option key={option} value={option}>{option}</option>
                   ))}
                 </select>
@@ -232,12 +224,12 @@ export function DashboardPage() {
       </Card>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {([
+        {[
           { label: 'Total leads uploaded', value: metrics.totalUploaded, Icon: Users, tone: 'info' },
           { label: 'Leads processed', value: metrics.leadsProcessed, Icon: Activity, tone: 'coral' },
           { label: 'Leads dropped', value: metrics.leadsDropped, Icon: Filter, tone: 'danger' },
           { label: 'Leads enriched', value: metrics.leadsEnriched, Icon: DatabaseZap, tone: 'success' },
-        ] satisfies KpiCard[]).map(({ label, value, Icon, tone }) => (
+        ].map(({ label, value, Icon, tone }) => (
           <Card key={label} className="p-5">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -260,9 +252,9 @@ export function DashboardPage() {
           ['Enrichment completion', formatPercent(metrics.completionRate), metrics.completionRate],
           ['Average confidence score', formatPercent(metrics.averageConfidence), metrics.averageConfidence],
         ].map(([label, value, progress]) => (
-          <Card key={String(label)} className="p-5">
-            <p className="text-sm font-bold text-brand-muted">{String(label)}</p>
-            <p className="mt-2 text-3xl font-extrabold text-brand-ink">{String(value)}</p>
+          <Card key={label} className="p-5">
+            <p className="text-sm font-bold text-brand-muted">{label}</p>
+            <p className="mt-2 text-3xl font-extrabold text-brand-ink">{value}</p>
             <Progress value={Number(progress)} className="mt-4" />
           </Card>
         ))}

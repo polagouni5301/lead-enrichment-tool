@@ -1,6 +1,6 @@
 import { Progress } from '../ui/progress'
 
-export function ConfidenceMeter({ value, label = 'Confidence' }: { value: number; label?: string }) {
+export function ConfidenceMeter({ value, label = 'Confidence' }) {
   const color =
     value >= 85 ? 'from-emerald-500 to-teal-400' : value >= 70 ? 'from-brand-orange to-amber-400' : 'from-red-500 to-rose-400'
 

@@ -1,4 +1,3 @@
-import type { ColumnDef } from '@tanstack/react-table'
 import { motion } from 'framer-motion'
 import { Clipboard, DatabaseZap, Download, RefreshCcw, Send } from 'lucide-react'
 import { useMemo, useState } from 'react'
@@ -11,14 +10,13 @@ import { ConfidenceMeter } from '../components/workflow/ConfidenceMeter'
 import { StatusBadge } from '../components/workflow/StatusBadge'
 import { exportLeads } from '../services/exportService'
 import { useLeadStore } from '../store/useLeadStore'
-import type { Lead } from '../types/lead'
 
-function valueOrFallback(value?: string) {
+function valueOrFallback(value) {
   return value && value.trim() ? value : 'No information found'
 }
 
 export function EnrichmentPage() {
-  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [selectedIds, setSelectedIds] = useState([])
   const leads = useLeadStore((state) => state.leads)
   const setCurrentStep = useLeadStore((state) => state.setCurrentStep)
   const runEnrichment = useLeadStore((state) => state.runEnrichment)
@@ -42,11 +40,11 @@ export function EnrichmentPage() {
   const selectedLeads = processedLeads.filter((lead) => selectedIds.includes(lead.id))
   const isRunning = processingLeadIds.some((leadId) => queue.some((lead) => lead.id === leadId))
 
-  function toggleSelected(leadId: string, checked: boolean) {
+  function toggleSelected(leadId, checked) {
     setSelectedIds((current) => (checked ? [...new Set([...current, leadId])] : current.filter((id) => id !== leadId)))
   }
 
-  async function copy(value: string) {
+  async function copy(value) {
     await navigator.clipboard.writeText(value)
     addToast({ title: 'Copied', description: value, variant: 'success' })
   }
@@ -64,7 +62,7 @@ export function EnrichmentPage() {
     await Promise.all(pendingLeads.map((lead) => runEnrichment(lead.id)))
   }
 
-  function exportSelection(format: 'xlsx' | 'csv' | 'json') {
+  function exportSelection(format) {
     const exportable = selectedLeads.length ? selectedLeads : processedLeads
     if (!exportable.length) {
       addToast({ title: 'No enriched records', description: 'Run enrichment before exporting results.', variant: 'error' })
@@ -74,7 +72,7 @@ export function EnrichmentPage() {
     markExported(exportable.map((lead) => lead.id))
   }
 
-  const queueColumns = useMemo<ColumnDef<Lead, unknown>[]>(
+  const queueColumns = useMemo(
     () => [
       {
         accessorKey: 'companyName',
@@ -117,7 +115,7 @@ export function EnrichmentPage() {
     [processingLeadIds, runEnrichment],
   )
 
-  const resultColumns = useMemo<ColumnDef<Lead, unknown>[]>(
+  const resultColumns = useMemo(
     () => [
       {
         id: 'select',

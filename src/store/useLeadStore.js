@@ -1,42 +1,11 @@
 import { create } from 'zustand'
-import type {
-  DashboardMetrics,
-  Lead,
-  ManualChecks,
-  ToastMessage,
-  UploadLeadInput,
-  WorkflowStep,
-} from '../types/lead'
 import { enrichLeadApi, uploadLeadsApi, validateLeadApi } from '../services/mockApi'
 import { sampleLeads } from '../services/mockData'
 import { makeId, normalizeDomain } from '../utils/format'
 
-type LeadState = {
-  leads: Lead[]
-  currentStep: WorkflowStep
-  activeLeadId: string
-  processingLeadIds: string[]
-  toasts: ToastMessage[]
-  setCurrentStep: (step: WorkflowStep) => void
-  canAccessStep: (step: WorkflowStep) => boolean
-  setActiveLead: (leadId: string) => void
-  addToast: (toast: Omit<ToastMessage, 'id'>) => void
-  dismissToast: (id: string) => void
-  uploadLeads: (input: UploadLeadInput[]) => Promise<Lead[]>
-  runLowEffortValidation: (leadId: string) => Promise<void>
-  rejectLowEffortLead: (leadId: string) => void
-  updateManualChecks: (leadId: string, checks: Partial<ManualChecks>) => void
-  updateManualNotes: (leadId: string, notes: string) => void
-  approveManualValidation: (leadId: string) => void
-  rejectManualValidation: (leadId: string) => void
-  runEnrichment: (leadId: string) => Promise<void>
-  markExported: (leadIds: string[]) => void
-  getMetrics: () => DashboardMetrics
-}
+const stepOrder = ['upload', 'lowEffort', 'manual', 'enrichment', 'dashboard']
 
-const stepOrder: WorkflowStep[] = ['upload', 'lowEffort', 'manual', 'enrichment', 'dashboard']
-
-function audit(actor: string, action: string, note?: string) {
+function audit(actor, action, note) {
   return {
     id: makeId('audit'),
     actor,
@@ -46,11 +15,11 @@ function audit(actor: string, action: string, note?: string) {
   }
 }
 
-function allManualChecksComplete(checks: ManualChecks) {
+function allManualChecksComplete(checks) {
   return Object.values(checks).every(Boolean)
 }
 
-function computeMetrics(leads: Lead[]): DashboardMetrics {
+function computeMetrics(leads) {
   const processed = leads.filter((lead) => lead.status !== 'Uploaded').length
   const dropped = leads.filter((lead) => lead.status.includes('Failed')).length
   const enriched = leads.filter((lead) => lead.status === 'Enrichment Complete' || lead.status === 'Exported').length
@@ -79,7 +48,7 @@ function computeMetrics(leads: Lead[]): DashboardMetrics {
   }
 }
 
-export const useLeadStore = create<LeadState>((set, get) => ({
+export const useLeadStore = create((set, get) => ({
   leads: sampleLeads,
   currentStep: 'upload',
   activeLeadId: sampleLeads[0]?.id ?? '',

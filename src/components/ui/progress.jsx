@@ -1,13 +1,6 @@
 import { cn } from '../../utils/cn'
 
-type ProgressProps = {
-  value: number
-  className?: string
-  indicatorClassName?: string
-  label?: string
-}
-
-export function Progress({ value, className, indicatorClassName, label }: ProgressProps) {
+export function Progress({ value, className, indicatorClassName, label }) {
   const safeValue = Math.max(0, Math.min(100, value))
 
   return (

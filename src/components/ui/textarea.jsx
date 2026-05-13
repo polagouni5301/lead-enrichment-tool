@@ -1,7 +1,7 @@
-import { forwardRef, type TextareaHTMLAttributes } from 'react'
+import { forwardRef } from 'react'
 import { cn } from '../../utils/cn'
 
-export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<HTMLTextAreaElement>>(
+export const Textarea = forwardRef(
   ({ className, ...props }, ref) => (
     <textarea
       ref={ref}

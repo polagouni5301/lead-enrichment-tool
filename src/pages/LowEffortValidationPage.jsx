@@ -1,4 +1,3 @@
-import type { ColumnDef } from '@tanstack/react-table'
 import { motion } from 'framer-motion'
 import {
   AlertTriangle,
@@ -12,7 +11,6 @@ import {
   Sparkles,
   Store,
   XCircle,
-  type LucideIcon,
 } from 'lucide-react'
 import { useMemo } from 'react'
 import { DataTable } from '../components/data/DataTable'
@@ -23,10 +21,9 @@ import { EmptyState } from '../components/ui/empty-state'
 import { ConfidenceMeter } from '../components/workflow/ConfidenceMeter'
 import { StatusBadge } from '../components/workflow/StatusBadge'
 import { useLeadStore } from '../store/useLeadStore'
-import type { Lead, ValidationCard } from '../types/lead'
 import { cn } from '../utils/cn'
 
-function ValidationResultCard({ card }: { card: ValidationCard }) {
+function ValidationResultCard({ card }) {
   const Icon = card.result === 'Pass' ? CheckCircle2 : card.result === 'Fail' ? XCircle : AlertTriangle
   const tone = card.result === 'Pass' ? 'success' : card.result === 'Fail' ? 'danger' : 'warning'
 
@@ -74,7 +71,7 @@ function ValidationResultCard({ card }: { card: ValidationCard }) {
   )
 }
 
-const validationSignals: Array<{ title: string; description: string; Icon: LucideIcon }> = [
+const validationSignals = [
   { title: 'Company website', description: 'Exists, live, and business-facing', Icon: Globe2 },
   { title: 'Business type', description: 'Real SMB versus chain or suspicious entity', Icon: Store },
   { title: 'Location & language', description: 'Region, language, and geo consistency', Icon: MapPin },
@@ -83,7 +80,7 @@ const validationSignals: Array<{ title: string; description: string; Icon: Lucid
   { title: 'Too-big enterprise', description: 'Česká Pošta, Żabka, Carrefour-style chains', Icon: Landmark },
 ]
 
-function failedReason(lead: Lead) {
+function failedReason(lead) {
   return lead.lowEffortResults.find((result) => result.result === 'Fail')?.type ?? 'None'
 }
 
@@ -123,7 +120,7 @@ export function LowEffortValidationPage() {
     await Promise.all(pendingLeads.map((lead) => runLowEffortValidation(lead.id)))
   }
 
-  const leadColumns = useMemo<ColumnDef<Lead, unknown>[]>(
+  const leadColumns = useMemo(
     () => [
       {
         accessorKey: 'companyName',
@@ -163,7 +160,7 @@ export function LowEffortValidationPage() {
     [processingLeadIds, runLowEffortValidation],
   )
 
-  const resultColumns = useMemo<ColumnDef<Lead, unknown>[]>(
+  const resultColumns = useMemo(
     () => [
       {
         accessorKey: 'companyName',

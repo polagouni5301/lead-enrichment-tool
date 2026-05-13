@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import type { ColumnDef } from '@tanstack/react-table'
 import { motion } from 'framer-motion'
 import { Download, FileSpreadsheet, Save, ShieldCheck, UploadCloud } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
@@ -15,7 +14,6 @@ import { Label } from '../components/ui/label'
 import { Progress } from '../components/ui/progress'
 import { createTemplateWorkbook } from '../services/exportService'
 import { useLeadStore } from '../store/useLeadStore'
-import type { UploadLeadInput } from '../types/lead'
 import { normalizeDomain } from '../utils/format'
 
 const domainRegex = /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/
@@ -41,9 +39,7 @@ const uploadSchema = z.object({
     .refine((value) => domainRegex.test(value), 'Enter a valid email domain'),
 })
 
-type UploadFormValues = z.input<typeof uploadSchema>
-
-const defaultValues: UploadFormValues = {
+const defaultValues = {
   date: new Date().toISOString().slice(0, 10),
   region: 'Poland',
   industry: 'Hospitality',
@@ -54,7 +50,7 @@ const defaultValues: UploadFormValues = {
   emailDomainName: '',
 }
 
-function mapWorkbookRow(row: Record<string, unknown>): UploadLeadInput {
+function mapWorkbookRow(row) {
   return {
     date: String(row.date ?? row.Date ?? ''),
     region: String(row.region ?? row.Region ?? ''),
@@ -67,7 +63,7 @@ function mapWorkbookRow(row: Record<string, unknown>): UploadLeadInput {
   }
 }
 
-function cellValueToString(value: ExcelJS.CellValue | undefined) {
+function cellValueToString(value) {
   if (value === null || value === undefined) return ''
   if (value instanceof Date) return value.toISOString().slice(0, 10)
   if (typeof value === 'object') {
@@ -81,40 +77,39 @@ function cellValueToString(value: ExcelJS.CellValue | undefined) {
   return String(value)
 }
 
-function parseCsv(text: string) {
+function parseCsv(text) {
   const [headerLine, ...lines] = text.split(/\r?\n/).filter(Boolean)
   const headers = headerLine.split(',').map((header) => header.trim())
   return lines.map((line) => {
     const values = line.split(',').map((value) => value.trim().replace(/^"|"$/g, ''))
-    return headers.reduce<Record<string, unknown>>((row, header, index) => {
+    return headers.reduce((row, header, index) => {
       row[header] = values[index] ?? ''
       return row
     }, {})
   })
 }
 
-async function parseWorkbook(file: File) {
+async function parseWorkbook(file) {
   if (/\.csv$/i.test(file.name)) {
     return parseCsv(await file.text())
   }
 
   const buffer = await file.arrayBuffer()
   const workbook = new ExcelJS.Workbook()
-  type LoadBuffer = Parameters<ExcelJS.Workbook['xlsx']['load']>[0]
-  await workbook.xlsx.load(buffer as unknown as LoadBuffer)
+  await workbook.xlsx.load(buffer)
   const worksheet = workbook.worksheets[0]
   if (!worksheet) return []
 
   const headerRow = worksheet.getRow(1)
-  const headers: string[] = []
+  const headers = []
   headerRow.eachCell((cell, columnNumber) => {
     headers[columnNumber] = cellValueToString(cell.value).trim()
   })
 
-  const rows: Record<string, unknown>[] = []
+  const rows = []
   worksheet.eachRow((row, rowNumber) => {
     if (rowNumber === 1) return
-    const record: Record<string, unknown> = {}
+    const record = {}
     row.eachCell((cell, columnNumber) => {
       const header = headers[columnNumber]
       if (header) record[header] = cellValueToString(cell.value)
@@ -126,11 +121,11 @@ async function parseWorkbook(file: File) {
 }
 
 export function UploadPage() {
-  const [method, setMethod] = useState<'individual' | 'bulk'>('individual')
-  const [draftLeads, setDraftLeads] = useState<UploadLeadInput[]>([])
+  const [method, setMethod] = useState('individual')
+  const [draftLeads, setDraftLeads] = useState([])
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isParsing, setIsParsing] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const fileInputRef = useRef(null)
   const leads = useLeadStore((state) => state.leads)
   const uploadLeads = useLeadStore((state) => state.uploadLeads)
   const addToast = useLeadStore((state) => state.addToast)
@@ -140,14 +135,14 @@ export function UploadPage() {
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm<UploadFormValues>({
+  } = useForm({
     resolver: zodResolver(uploadSchema),
     defaultValues,
   })
 
   const duplicateDomains = useMemo(() => new Set(leads.map((lead) => normalizeDomain(lead.websiteDomainName))), [leads])
 
-  const draftColumns = useMemo<ColumnDef<UploadLeadInput, unknown>[]>(
+  const draftColumns = useMemo(
     () => [
       {
         accessorKey: 'companyName',
@@ -177,14 +172,14 @@ export function UploadPage() {
     [duplicateDomains],
   )
 
-  function saveDraft(values: UploadFormValues) {
+  function saveDraft(values) {
     const parsed = uploadSchema.parse(values)
     setDraftLeads((current) => [parsed, ...current])
     addToast({ title: 'Draft saved', description: 'Lead added to the upload preview.', variant: 'success' })
     reset(defaultValues)
   }
 
-  async function parseFile(file: File) {
+  async function parseFile(file) {
     const validExtension = /\.(xlsx|xls|csv)$/i.test(file.name)
     if (!validExtension) {
       addToast({
@@ -307,10 +302,10 @@ export function UploadPage() {
                 ].map(([name, label, type]) => (
                   <div className="space-y-2" key={name}>
                     <Label htmlFor={name}>{label}</Label>
-                    <Input id={name} type={type} {...register(name as keyof UploadFormValues)} />
-                    {errors[name as keyof UploadFormValues]?.message ? (
+                    <Input id={name} type={type} {...register(name)} />
+                    {errors[name]?.message ? (
                       <p className="text-xs font-semibold text-red-600">
-                        {String(errors[name as keyof UploadFormValues]?.message)}
+                        {String(errors[name]?.message)}
                       </p>
                     ) : null}
                   </div>

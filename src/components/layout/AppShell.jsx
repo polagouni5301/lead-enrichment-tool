@@ -1,10 +1,9 @@
-import type { ReactNode } from 'react'
 import { Header } from './Header'
 import { Sidebar } from './Sidebar'
 import { ProgressStepper } from '../workflow/ProgressStepper'
 import { ToastViewport } from '../ui/toast'
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children }) {
   return (
     <div className="min-h-screen text-brand-ink">
       <div className="flex min-h-screen">
