@@ -78,21 +78,9 @@ export const useLeadStore = create((set, get) => ({
           lead.status === 'Low Effort Validation Failed',
       )
     }
-    if (step === 'manual') {
-      return leads.some((lead) =>
-        ['Low Effort Validation Passed', 'Manual Validation Passed', 'Enrichment Complete', 'Exported'].includes(lead.status)
-      )
-    }
-    if (step === 'enrichment') {
-      return leads.some((lead) =>
-        ['Manual Validation Passed', 'Enrichment Complete', 'Exported'].includes(lead.status)
-      )
-    }
-    if (step === 'dashboard') {
-      return leads.some((lead) =>
-        ['Enrichment Complete', 'Exported'].includes(lead.status)
-      )
-    }
+    if (step === 'manual') return leads.some((lead) => lead.status === 'Low Effort Validation Passed')
+    if (step === 'enrichment') return leads.some((lead) => lead.status === 'Manual Validation Passed')
+    if (step === 'dashboard') return leads.some((lead) => lead.status === 'Enrichment Complete' || lead.status === 'Exported')
     if (step === 'newBusiness') return true
     return true
   },
