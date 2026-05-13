@@ -272,10 +272,10 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <FunnelChart>
+              <FunnelChart margin={{ top: 20, right: 120, bottom: 20, left: 20 }}>
                 <Tooltip />
                 <Funnel dataKey="value" data={funnelData} isAnimationActive>
-                  <LabelList position="right" fill="#161916" stroke="none" dataKey="name" />
+                  <LabelList position="right" fill="#6D7069" stroke="none" dataKey="name" fontSize={12} fontWeight={700} />
                 </Funnel>
               </FunnelChart>
             </ResponsiveContainer>
