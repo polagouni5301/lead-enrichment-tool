@@ -10,6 +10,7 @@ import { ConfidenceMeter } from '../components/workflow/ConfidenceMeter'
 import { StatusBadge } from '../components/workflow/StatusBadge'
 import { exportLeads } from '../services/exportService'
 import { useLeadStore } from '../store/useLeadStore'
+import { cn } from '../utils/cn'
 
 function valueOrFallback(value) {
   return value && value.trim() ? value : 'No information found'
