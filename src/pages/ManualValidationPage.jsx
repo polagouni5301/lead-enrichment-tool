@@ -1,6 +1,6 @@
-import { motion } from 'framer-motion'
-import { CheckCircle2, Clock3, FileCheck2, History, Save, ShieldX, UserCheck } from 'lucide-react'
-import { useMemo } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ArrowLeft, CheckCircle2, Clock3, FileCheck2, History, Save, ShieldX, UserCheck } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { DataTable } from '../components/data/DataTable'
 import { Badge } from '../components/ui/badge'
 import { Button } from '../components/ui/button'
@@ -46,9 +46,13 @@ function checklistProgress(lead) {
 }
 
 export function ManualValidationPage() {
+  const [isReviewing, setIsReviewing] = useState(false)
   const leads = useLeadStore((state) => state.leads)
   const activeLeadId = useLeadStore((state) => state.activeLeadId)
-  const setActiveLead = useLeadStore((state) => state.setActiveLead)
+  const setActiveLead = (id) => {
+    useLeadStore.getState().setActiveLead(id)
+    setIsReviewing(true)
+  }
   const setCurrentStep = useLeadStore((state) => state.setCurrentStep)
   const updateManualChecks = useLeadStore((state) => state.updateManualChecks)
   const updateManualNotes = useLeadStore((state) => state.updateManualNotes)
@@ -126,174 +130,203 @@ export function ManualValidationPage() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <CardTitle className="text-2xl">Human validation workspace</CardTitle>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Badge tone="success">
-                  {queue.filter((lead) => lead.status === 'Low Effort Validation Passed').length} ready
-                </Badge>
-                <Badge tone="info">
-                  {queue.filter((lead) => lead.status === 'Manual Validation Passed').length} approved
-                </Badge>
-                <Badge tone="danger">
-                  {queue.filter((lead) => lead.status === 'Manual Validation Failed').length} rejected
-                </Badge>
-              </div>
-            </div>
-            <Button
-              type="button"
-              variant="success"
-              onClick={() => setCurrentStep('enrichment')}
-              disabled={!queue.some((lead) => lead.status === 'Manual Validation Passed')}
-            >
-              Open Enrichment Queue
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <DataTable data={queue} columns={columns} searchPlaceholder="Search manual validation leads" pageSize={6} />
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-        <Card>
-          <CardHeader>
-            <div className="flex flex-wrap items-center gap-2">
-              <CardTitle>{activeLead.companyName}</CardTitle>
-              <StatusBadge status={activeLead.status} />
-              <Badge tone="info">{activeLead.owner}</Badge>
-            </div>
-            <CardDescription>{activeLead.websiteDomainName} · {activeLead.region} · {activeLead.industry}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            <div className="grid gap-3 text-sm">
-              <div className="rounded-2xl bg-white/70 p-4">
-                <p className="font-bold text-brand-gray">Company LinkedIn</p>
-                <a className="break-all font-semibold text-brand-coral" href={activeLead.companyLinkedInUrl} target="_blank" rel="noreferrer">
-                  {activeLead.companyLinkedInUrl}
-                </a>
-              </div>
-              <div className="rounded-2xl bg-white/70 p-4">
-                <p className="font-bold text-brand-gray">Employee LinkedIn</p>
-                <a className="break-all font-semibold text-brand-coral" href={activeLead.employeeLinkedInUrl} target="_blank" rel="noreferrer">
-                  {activeLead.employeeLinkedInUrl}
-                </a>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <CardTitle>Validation checklist</CardTitle>
-                <CardDescription>All mandatory validations must be complete before enrichment unlocks.</CardDescription>
-              </div>
-              <Badge tone={allManualChecksComplete(activeLead.manualChecks) ? 'success' : 'warning'}>
-                {completedChecks}/{checklist.length} complete
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            <Progress value={completion} label="Manual validation progress" />
-            <div className="space-y-3">
-              {checklist.map((item) => (
-                <div key={item.key} className="flex items-start justify-between gap-4 rounded-3xl border border-black/[0.06] bg-white/70 p-4">
-                  <div className="flex gap-3">
-                    <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-brand-coral/10 text-brand-coral">
-                      <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
-                    </div>
-                    <div>
-                      <p className="font-extrabold text-brand-ink">{item.label}</p>
-                      <p className="mt-1 text-sm leading-6 text-brand-muted">{item.description}</p>
+      <AnimatePresence mode="wait">
+        {!isReviewing ? (
+          <motion.div
+            key="list"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="space-y-6"
+          >
+            <Card>
+              <CardHeader>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <CardTitle className="text-2xl">Human validation workspace</CardTitle>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Badge tone="success">
+                        {queue.filter((lead) => lead.status === 'Low Effort Validation Passed').length} ready
+                      </Badge>
+                      <Badge tone="info">
+                        {queue.filter((lead) => lead.status === 'Manual Validation Passed').length} approved
+                      </Badge>
+                      <Badge tone="danger">
+                        {queue.filter((lead) => lead.status === 'Manual Validation Failed').length} rejected
+                      </Badge>
                     </div>
                   </div>
-                  <Switch
-                    checked={activeLead.manualChecks[item.key]}
-                    onCheckedChange={(checked) => updateManualChecks(activeLead.id, { [item.key]: checked })}
-                    label={item.label}
-                  />
+                  <Button
+                    type="button"
+                    variant="success"
+                    onClick={() => useLeadStore.getState().setCurrentStep('enrichment')}
+                    disabled={!queue.some((lead) => lead.status === 'Manual Validation Passed')}
+                  >
+                    Open Enrichment Queue
+                  </Button>
                 </div>
-              ))}
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-extrabold text-brand-ink" htmlFor="agent-notes">
-                Agent notes
-              </label>
-              <Textarea
-                id="agent-notes"
-                placeholder="Add validation context, edge cases, or ownership notes..."
-                value={activeLead.manualNotes}
-                onChange={(event) => updateManualNotes(activeLead.id, event.target.value)}
-              />
-            </div>
-
-            <div className="flex flex-wrap gap-3">
+              </CardHeader>
+              <CardContent>
+                <DataTable data={queue} columns={columns} searchPlaceholder="Search manual validation leads" pageSize={6} />
+              </CardContent>
+            </Card>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="review"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-6"
+          >
+            <div className="flex items-center gap-4">
               <Button
                 type="button"
-                variant="outline"
-                leftIcon={<Save className="h-4 w-4" aria-hidden="true" />}
-                onClick={() => addToast({ title: 'Progress saved', description: 'Manual checklist and notes were retained.', variant: 'success' })}
+                variant="ghost"
+                onClick={() => setIsReviewing(false)}
+                leftIcon={<ArrowLeft className="h-4 w-4" />}
               >
-                Save Progress
-              </Button>
-              <Button
-                type="button"
-                variant="danger"
-                leftIcon={<ShieldX className="h-4 w-4" aria-hidden="true" />}
-                onClick={() => rejectManualValidation(activeLead.id)}
-                disabled={activeLead.status === 'Manual Validation Failed'}
-              >
-                Reject Lead
-              </Button>
-              <Button
-                type="button"
-                variant="success"
-                leftIcon={<UserCheck className="h-4 w-4" aria-hidden="true" />}
-                onClick={() => approveManualValidation(activeLead.id)}
-                disabled={activeLead.status === 'Manual Validation Passed'}
-              >
-                Approve for Enrichment
+                Back to list
               </Button>
             </div>
-          </CardContent>
-        </Card>
-      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Audit trail & validation history</CardTitle>
-          <CardDescription>Timestamped activity captures agent attribution and system decisions.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {activeLead.validationHistory.map((event) => (
-              <div key={event.id} className="rounded-3xl border border-black/[0.06] bg-white/70 p-4">
-                <div className="flex items-center gap-2">
-                  <History className="h-4 w-4 text-brand-coral" aria-hidden="true" />
-                  <p className="font-extrabold text-brand-ink">{event.action}</p>
-                </div>
-                <p className="mt-2 text-sm text-brand-muted">{event.actor}</p>
-                <div className="mt-3 flex items-center gap-2 text-xs font-bold text-brand-gray">
-                  <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
-                  {formatDateTime(event.timestamp)}
-                </div>
-                {event.note ? <p className="mt-3 rounded-2xl bg-brand-card p-3 text-sm text-brand-muted">{event.note}</p> : null}
-              </div>
-            ))}
-            <div className="rounded-3xl border border-dashed border-brand-coral/25 bg-brand-coral/5 p-4">
-              <FileCheck2 className="h-5 w-5 text-brand-coral" aria-hidden="true" />
-              <p className="mt-3 font-extrabold text-brand-ink">Agent attribution</p>
-              <p className="mt-1 text-sm leading-6 text-brand-muted">Current manual owner is Mila Reyes. New approvals write to the lead history.</p>
+            <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+              <Card>
+                <CardHeader>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <CardTitle>{activeLead.companyName}</CardTitle>
+                    <StatusBadge status={activeLead.status} />
+                    <Badge tone="info">{activeLead.owner}</Badge>
+                  </div>
+                  <CardDescription>{activeLead.websiteDomainName} · {activeLead.region}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-5">
+                  <div className="grid gap-3 text-sm">
+                    <div className="rounded-2xl bg-white/70 p-4">
+                      <p className="font-bold text-brand-gray">Company LinkedIn</p>
+                      <a className="break-all font-semibold text-brand-coral" href={activeLead.companyLinkedInUrl} target="_blank" rel="noreferrer">
+                        {activeLead.companyLinkedInUrl}
+                      </a>
+                    </div>
+                    <div className="rounded-2xl bg-white/70 p-4">
+                      <p className="font-bold text-brand-gray">Employee LinkedIn</p>
+                      <a className="break-all font-semibold text-brand-coral" href={activeLead.employeeLinkedInUrl} target="_blank" rel="noreferrer">
+                        {activeLead.employeeLinkedInUrl}
+                      </a>
+                    </div>
+                    {activeLead.enrichment && (
+                      <>
+                        <div className="rounded-2xl bg-white/70 p-4">
+                          <p className="font-bold text-brand-gray">Decision Maker</p>
+                          <p className="font-semibold text-brand-ink">{activeLead.enrichment.keyDecisionMakerName}</p>
+                        </div>
+                        <div className="rounded-2xl bg-white/70 p-4">
+                          <p className="font-bold text-brand-gray">Position</p>
+                          <p className="font-semibold text-brand-ink">{activeLead.enrichment.position}</p>
+                        </div>
+                        <div className="rounded-2xl bg-white/70 p-4">
+                          <p className="font-bold text-brand-gray">Email</p>
+                          <p className="font-semibold text-brand-ink">{activeLead.enrichment.emailAddress}</p>
+                        </div>
+                        <div className="rounded-2xl bg-white/70 p-4">
+                          <p className="font-bold text-brand-gray">Phone</p>
+                          <p className="font-semibold text-brand-ink">{activeLead.enrichment.phoneNumber}</p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <CardTitle>Validation checklist</CardTitle>
+                      <CardDescription>All mandatory validations must be complete before enrichment unlocks.</CardDescription>
+                    </div>
+                    <Badge tone={allManualChecksComplete(activeLead.manualChecks) ? 'success' : 'warning'}>
+                      {completedChecks}/{checklist.length} complete
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-5">
+                  <Progress value={completion} label="Manual validation progress" />
+                  <div className="space-y-3">
+                    {checklist.map((item) => (
+                      <div key={item.key} className="flex items-start justify-between gap-4 rounded-3xl border border-black/[0.06] bg-white/70 p-4">
+                        <div className="flex gap-3">
+                          <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-brand-coral/10 text-brand-coral">
+                            <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+                          </div>
+                          <div>
+                            <p className="font-extrabold text-brand-ink">{item.label}</p>
+                            <p className="mt-1 text-sm leading-6 text-brand-muted">{item.description}</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={activeLead.manualChecks[item.key]}
+                          onCheckedChange={(checked) => updateManualChecks(activeLead.id, { [item.key]: checked })}
+                          label={item.label}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-extrabold text-brand-ink" htmlFor="agent-notes">
+                      Agent notes
+                    </label>
+                    <Textarea
+                      id="agent-notes"
+                      placeholder="Add validation context, edge cases, or ownership notes..."
+                      value={activeLead.manualNotes}
+                      onChange={(event) => updateManualNotes(activeLead.id, event.target.value)}
+                    />
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      leftIcon={<Save className="h-4 w-4" aria-hidden="true" />}
+                      onClick={() => addToast({ title: 'Progress saved', description: 'Manual checklist and notes were retained.', variant: 'success' })}
+                    >
+                      Save Progress
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="danger"
+                      leftIcon={<ShieldX className="h-4 w-4" aria-hidden="true" />}
+                      onClick={() => {
+                        rejectManualValidation(activeLead.id)
+                        setIsReviewing(false)
+                      }}
+                      disabled={activeLead.status === 'Manual Validation Failed'}
+                    >
+                      Reject Lead
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="success"
+                      leftIcon={<UserCheck className="h-4 w-4" aria-hidden="true" />}
+                      onClick={() => {
+                        approveManualValidation(activeLead.id)
+                        if (allManualChecksComplete(activeLead.manualChecks)) {
+                          setIsReviewing(false)
+                        }
+                      }}
+                      disabled={activeLead.status === 'Manual Validation Passed' || !allManualChecksComplete(activeLead.manualChecks)}
+                    >
+                      Approve for Enrichment
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }

@@ -4,6 +4,7 @@ import { DashboardPage } from './pages/DashboardPage'
 import { EnrichmentPage } from './pages/EnrichmentPage'
 import { LowEffortValidationPage } from './pages/LowEffortValidationPage'
 import { ManualValidationPage } from './pages/ManualValidationPage'
+import { NewBusinessEnrichmentPage } from './pages/NewBusinessEnrichmentPage'
 import { UploadPage } from './pages/UploadPage'
 import { useLeadStore } from './store/useLeadStore'
 
@@ -13,6 +14,7 @@ const screens = {
   manual: ManualValidationPage,
   enrichment: EnrichmentPage,
   dashboard: DashboardPage,
+  newBusiness: NewBusinessEnrichmentPage,
 }
 
 function App() {

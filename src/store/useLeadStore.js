@@ -3,7 +3,7 @@ import { enrichLeadApi, uploadLeadsApi, validateLeadApi } from '../services/mock
 import { sampleLeads } from '../services/mockData'
 import { makeId, normalizeDomain } from '../utils/format'
 
-const stepOrder = ['upload', 'lowEffort', 'manual', 'enrichment', 'dashboard']
+const stepOrder = ['upload', 'lowEffort', 'manual', 'enrichment', 'dashboard', 'newBusiness']
 
 function audit(actor, action, note) {
   return {
@@ -78,9 +78,22 @@ export const useLeadStore = create((set, get) => ({
           lead.status === 'Low Effort Validation Failed',
       )
     }
-    if (step === 'manual') return leads.some((lead) => lead.status === 'Low Effort Validation Passed')
-    if (step === 'enrichment') return leads.some((lead) => lead.status === 'Manual Validation Passed')
-    if (step === 'dashboard') return leads.some((lead) => lead.status === 'Enrichment Complete' || lead.status === 'Exported')
+    if (step === 'manual') {
+      return leads.some((lead) =>
+        ['Low Effort Validation Passed', 'Manual Validation Passed', 'Enrichment Complete', 'Exported'].includes(lead.status)
+      )
+    }
+    if (step === 'enrichment') {
+      return leads.some((lead) =>
+        ['Manual Validation Passed', 'Enrichment Complete', 'Exported'].includes(lead.status)
+      )
+    }
+    if (step === 'dashboard') {
+      return leads.some((lead) =>
+        ['Enrichment Complete', 'Exported'].includes(lead.status)
+      )
+    }
+    if (step === 'newBusiness') return true
     return true
   },
   setActiveLead: (leadId) => set({ activeLeadId: leadId }),
@@ -274,6 +287,14 @@ export const useLeadStore = create((set, get) => ({
       ),
     }))
     get().addToast({ title: 'Export ready', description: `${leadIds.length} lead record exported.`, variant: 'success' })
+  },
+  updateLeadStatus: (leadId, status) => {
+    set((state) => ({
+      leads: state.leads.map((lead) =>
+        lead.id === leadId ? { ...lead, status } : lead
+      ),
+    }))
+    get().addToast({ title: 'Status updated', description: `Lead status changed to ${status}.`, variant: 'success' })
   },
   getMetrics: () => computeMetrics(get().leads),
 }))

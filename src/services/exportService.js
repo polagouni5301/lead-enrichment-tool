@@ -107,7 +107,6 @@ export async function createTemplateWorkbook() {
           {
             date: '2026-05-12',
             region: 'Poland',
-            industry: 'Hospitality',
             companyName: 'Lumora Bistro',
             companyLinkedInUrl: 'https://www.linkedin.com/company/lumora-bistro',
             employeeLinkedInUrl: 'https://www.linkedin.com/in/marta-kowalska',

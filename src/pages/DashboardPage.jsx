@@ -58,6 +58,7 @@ export function DashboardPage() {
   const [region, setRegion] = useState('All')
   const [industry, setIndustry] = useState('All')
   const [status, setStatus] = useState('All')
+  const [agent, setAgent] = useState('All')
   const [confidence, setConfidence] = useState(0)
   const [dateFrom, setDateFrom] = useState('2026-05-01')
   const [dateTo, setDateTo] = useState('2026-05-12')
@@ -66,6 +67,7 @@ export function DashboardPage() {
   const regions = ['All', ...Array.from(new Set(leads.map((lead) => lead.region)))]
   const industries = ['All', ...Array.from(new Set(leads.map((lead) => lead.industry)))]
   const statuses = ['All', ...Array.from(new Set(leads.map((lead) => lead.status)))]
+  const agents = ['All', ...Array.from(new Set(leads.map((lead) => lead.owner)))]
 
   const filteredLeads = useMemo(
     () =>
@@ -75,12 +77,13 @@ export function DashboardPage() {
           (region === 'All' || lead.region === region) &&
           (industry === 'All' || lead.industry === industry) &&
           (status === 'All' || lead.status === status) &&
+          (agent === 'All' || lead.owner === agent) &&
           confidenceScore >= confidence &&
           lead.date >= dateFrom &&
           lead.date <= dateTo
         )
       }),
-    [leads, region, industry, status, confidence, dateFrom, dateTo],
+    [leads, region, industry, status, agent, confidence, dateFrom, dateTo],
   )
 
   const metrics = computeFilteredMetrics(filteredLeads)
@@ -189,6 +192,7 @@ export function DashboardPage() {
               ['region', 'Region', region, setRegion, regions],
               ['industry', 'Industry', industry, setIndustry, industries],
               ['status', 'Validation status', status, setStatus, statuses],
+              ['agent', 'Agent', agent, setAgent, agents],
             ].map(([id, label, value, setter, options]) => (
               <div className="space-y-2" key={id}>
                 <label className="text-xs font-bold uppercase text-brand-gray" htmlFor={id}>{label}</label>

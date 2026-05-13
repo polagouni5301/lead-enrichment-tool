@@ -21,7 +21,6 @@ const domainRegex = /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/
 const uploadSchema = z.object({
   date: z.string().min(1, 'Date is required'),
   region: z.string().min(2, 'Region is required'),
-  industry: z.string().min(2, 'Industry is required'),
   companyName: z.string().min(2, 'Company name is required'),
   companyLinkedInUrl: z.string().url('Enter a valid URL').includes('linkedin.com', {
     message: 'Company LinkedIn URL must be a LinkedIn URL',
@@ -42,7 +41,6 @@ const uploadSchema = z.object({
 const defaultValues = {
   date: new Date().toISOString().slice(0, 10),
   region: 'Poland',
-  industry: 'Hospitality',
   companyName: '',
   companyLinkedInUrl: '',
   employeeLinkedInUrl: '',
@@ -54,7 +52,6 @@ function mapWorkbookRow(row) {
   return {
     date: String(row.date ?? row.Date ?? ''),
     region: String(row.region ?? row.Region ?? ''),
-    industry: String(row.industry ?? row.Industry ?? ''),
     companyName: String(row.companyName ?? row['Company Name'] ?? row.company ?? ''),
     companyLinkedInUrl: String(row.companyLinkedInUrl ?? row['Company LinkedIn URL'] ?? ''),
     employeeLinkedInUrl: String(row.employeeLinkedInUrl ?? row['Employee LinkedIn URL'] ?? ''),
@@ -150,7 +147,6 @@ export function UploadPage() {
         cell: ({ row }) => <span className="font-bold text-brand-ink">{row.original.companyName}</span>,
       },
       { accessorKey: 'region', header: 'Region' },
-      { accessorKey: 'industry', header: 'Industry' },
       { accessorKey: 'websiteDomainName', header: 'Website' },
       {
         id: 'validity',
@@ -293,7 +289,6 @@ export function UploadPage() {
                 {[
                   ['date', 'Date', 'date'],
                   ['region', 'Region', 'text'],
-                  ['industry', 'Industry', 'text'],
                   ['companyName', 'Company Name', 'text'],
                   ['companyLinkedInUrl', 'Company LinkedIn URL', 'url'],
                   ['employeeLinkedInUrl', 'Employee LinkedIn URL', 'url'],
