@@ -128,7 +128,6 @@ export function LowEffortValidationPage() {
         cell: ({ row }) => <span className="font-extrabold text-brand-ink">{row.original.companyName}</span>,
       },
       { accessorKey: 'region', header: 'Region' },
-      { accessorKey: 'industry', header: 'Industry' },
       { accessorKey: 'websiteDomainName', header: 'Website' },
       {
         accessorKey: 'status',
@@ -216,12 +215,12 @@ export function LowEffortValidationPage() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-      <Card>
-        <CardHeader>
+      <Card className="max-w-5xl">
+        <CardHeader className="py-4">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <CardTitle className="text-2xl">Low effort enrichment</CardTitle>
-              <div className="mt-3 flex flex-wrap gap-2">
+              <CardTitle className="text-xl">Low effort enrichment</CardTitle>
+              <div className="mt-2 flex flex-wrap gap-2">
                 <Badge tone="neutral">{pendingLeads.length} pending</Badge>
                 <Badge tone="success">{passedLeads.length} passed</Badge>
                 <Badge tone="danger">{failedLeads.length} failed</Badge>
@@ -230,6 +229,7 @@ export function LowEffortValidationPage() {
             <div className="flex flex-wrap gap-3">
               <Button
                 type="button"
+                size="sm"
                 onClick={() => void runBulkValidation()}
                 isLoading={isRunning}
                 disabled={!pendingLeads.length || isRunning}
@@ -239,6 +239,7 @@ export function LowEffortValidationPage() {
               </Button>
               <Button
                 type="button"
+                size="sm"
                 variant="success"
                 onClick={() => setCurrentStep('manual')}
                 disabled={!passedLeads.length}
@@ -249,13 +250,13 @@ export function LowEffortValidationPage() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <CardContent className="space-y-4 py-4">
+          <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-6">
             {validationSignals.map(({ title, description, Icon }) => (
-              <div key={title} className="rounded-3xl border border-black/[0.06] bg-white/70 p-4">
-                <Icon className="h-5 w-5 text-brand-coral" aria-hidden="true" />
-                <p className="mt-3 font-extrabold text-brand-ink">{title}</p>
-                <p className="mt-1 text-sm leading-5 text-brand-muted">{description}</p>
+              <div key={title} className="rounded-2xl border border-black/[0.06] bg-white/70 p-3">
+                <Icon className="h-4 w-4 text-brand-coral" aria-hidden="true" />
+                <p className="mt-2 text-xs font-extrabold text-brand-ink">{title}</p>
+                <p className="mt-0.5 text-[10px] leading-4 text-brand-muted">{description}</p>
               </div>
             ))}
           </div>

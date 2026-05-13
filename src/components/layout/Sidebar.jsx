@@ -4,6 +4,7 @@ import {
   CheckSquare,
   DatabaseZap,
   Lock,
+  Table,
   UploadCloud,
 } from 'lucide-react'
 import { useMemo } from 'react'
@@ -16,6 +17,7 @@ const navItems = [
   { id: 'manual', label: 'Manual Validation', icon: CheckSquare },
   { id: 'enrichment', label: 'Enrichment', icon: DatabaseZap },
   { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+  { id: 'newBusiness', label: 'New Business Enrichment data', icon: Table },
 ]
 
 export function Sidebar() {
@@ -78,19 +80,6 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="mt-auto rounded-3xl border border-black/[0.06] bg-brand-card p-4">
-        <p className="text-xs font-bold uppercase text-brand-gray">Pipeline Pulse</p>
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          <div>
-            <p className="text-2xl font-extrabold text-brand-ink">{metrics.totalUploaded}</p>
-            <p className="text-xs font-semibold text-brand-muted">Uploaded</p>
-          </div>
-          <div>
-            <p className="text-2xl font-extrabold text-brand-ink">{Math.round(metrics.passRate)}%</p>
-            <p className="text-xs font-semibold text-brand-muted">Pass rate</p>
-          </div>
-        </div>
-      </div>
     </aside>
   )
 }

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Clipboard, DatabaseZap, Download, RefreshCcw, Send } from 'lucide-react'
+import { ChevronDown, Clipboard, DatabaseZap, Download, RefreshCcw, Send } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { DataTable } from '../components/data/DataTable'
 import { Badge } from '../components/ui/badge'
@@ -42,6 +42,14 @@ export function EnrichmentPage() {
 
   function toggleSelected(leadId, checked) {
     setSelectedIds((current) => (checked ? [...new Set([...current, leadId])] : current.filter((id) => id !== leadId)))
+  }
+
+  function toggleSelectAll(checked) {
+    if (checked) {
+      setSelectedIds(processedLeads.map((lead) => lead.id))
+    } else {
+      setSelectedIds([])
+    }
   }
 
   async function copy(value) {
@@ -119,7 +127,15 @@ export function EnrichmentPage() {
     () => [
       {
         id: 'select',
-        header: '',
+        header: ({ table }) => (
+          <input
+            type="checkbox"
+            aria-label="Select all"
+            checked={selectedIds.length === processedLeads.length && processedLeads.length > 0}
+            onChange={(event) => toggleSelectAll(event.target.checked)}
+            className="h-4 w-4 rounded border-black/20 accent-brand-coral"
+          />
+        ),
         cell: ({ row }) => (
           <input
             type="checkbox"
@@ -164,11 +180,51 @@ export function EnrichmentPage() {
         cell: ({ row }) => valueOrFallback(row.original.enrichment?.phoneNumber),
       },
       {
+        id: 'position',
+        header: 'Position',
+        cell: ({ row }) => valueOrFallback(row.original.enrichment?.position),
+      },
+      {
+        id: 'otherContacts',
+        header: 'Other Contacts',
+        cell: ({ row }) => {
+          const contacts = row.original.enrichment?.additionalContacts ?? []
+          if (contacts.length === 0) return 'No other contacts'
+          return (
+            <div className="group relative">
+              <span className="cursor-help font-bold text-brand-coral underline decoration-dotted">
+                {contacts.length} found
+              </span>
+              <div className="absolute left-0 top-full z-50 mt-2 hidden w-64 rounded-xl border border-black/10 bg-white p-3 shadow-xl group-hover:block">
+                <ul className="space-y-2">
+                  {contacts.map((contact) => (
+                    <li key={contact.id} className="text-xs">
+                      <p className="font-bold text-brand-ink">{contact.name}</p>
+                      <p className="text-brand-muted">{contact.title}</p>
+                      <p className="text-brand-coral">{contact.email}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )
+        },
+      },
+      {
+        id: 'llmComments',
+        header: 'LLM Comments',
+        cell: ({ row }) => {
+          const results = row.original.lowEffortResults
+          const lastPass = results.filter((r) => r.result === 'Pass').pop()
+          return lastPass ? lastPass.reasoning : 'No comments'
+        },
+      },
+      {
         id: 'confidence',
         header: 'Confidence',
         cell: ({ row }) =>
           row.original.enrichment ? (
-            <div className="w-32">
+            <div className="w-24">
               <ConfidenceMeter value={row.original.enrichment.confidenceScore} label="" />
             </div>
           ) : (
@@ -178,10 +234,37 @@ export function EnrichmentPage() {
       {
         accessorKey: 'status',
         header: 'Status',
-        cell: ({ row }) => <StatusBadge status={row.original.status} />,
+        cell: ({ row }) => {
+          const lead = row.original
+          const statusOptions = ['Enrichment Complete', 'Ready to contact', 'Not enrichable']
+          const currentStatus = lead.status === 'Exported' ? 'Enrichment Complete' : lead.status
+
+          return (
+            <div className="relative inline-block w-40">
+              <select
+                value={currentStatus}
+                onChange={(e) => useLeadStore.getState().updateLeadStatus(lead.id, e.target.value)}
+                className={cn(
+                  'w-full appearance-none rounded-xl border-black/10 bg-white px-3 py-1.5 pr-8 text-xs font-bold transition focus:ring-2 focus:ring-brand-coral/20',
+                  lead.status === 'Not enrichable' ? 'text-red-600' : 'text-brand-ink',
+                )}
+              >
+                {!statusOptions.includes(currentStatus) && (
+                  <option value={currentStatus}>{currentStatus}</option>
+                )}
+                {statusOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt === 'Enrichment Complete' ? 'enrichment complete' : opt === 'Ready to contact' ? 'ready to contact' : 'not enrichable'}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-brand-muted" />
+            </div>
+          )
+        },
       },
     ],
-    [selectedIds],
+    [selectedIds, processedLeads],
   )
 
   if (!queue.length) {
@@ -277,9 +360,6 @@ export function EnrichmentPage() {
               </Button>
               <Button type="button" variant="outline" size="sm" onClick={() => exportSelection('csv')} leftIcon={<Download className="h-4 w-4" aria-hidden="true" />}>
                 CSV
-              </Button>
-              <Button type="button" variant="outline" size="sm" onClick={() => exportSelection('json')} leftIcon={<Send className="h-4 w-4" aria-hidden="true" />}>
-                JSON
               </Button>
             </div>
           </div>
