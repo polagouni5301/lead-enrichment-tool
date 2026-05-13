@@ -1,7 +1,6 @@
 import ExcelJS from 'exceljs'
-import type { DashboardMetrics, Lead } from '../types/lead'
 
-function downloadBlob(blob: Blob, filename: string) {
+function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
@@ -10,7 +9,7 @@ function downloadBlob(blob: Blob, filename: string) {
   URL.revokeObjectURL(url)
 }
 
-export function flattenLead(lead: Lead) {
+export function flattenLead(lead) {
   return {
     Company: lead.companyName,
     Region: lead.region,
@@ -27,17 +26,17 @@ export function flattenLead(lead: Lead) {
   }
 }
 
-function toCsv(rows: Record<string, unknown>[]) {
+function toCsv(rows) {
   if (!rows.length) return ''
   const headers = Object.keys(rows[0])
-  const escape = (value: unknown) => {
+  const escape = (value) => {
     const stringValue = String(value ?? '')
     return /[",\n]/.test(stringValue) ? `"${stringValue.replace(/"/g, '""')}"` : stringValue
   }
   return [headers.join(','), ...rows.map((row) => headers.map((header) => escape(row[header])).join(','))].join('\n')
 }
 
-async function writeWorkbook(sheets: Array<{ name: string; rows: Record<string, unknown>[] }>, filename: string) {
+async function writeWorkbook(sheets, filename) {
   const workbook = new ExcelJS.Workbook()
   workbook.creator = 'EnrichIQ'
   workbook.created = new Date()
@@ -68,7 +67,7 @@ async function writeWorkbook(sheets: Array<{ name: string; rows: Record<string, 
   )
 }
 
-export async function exportLeads(leads: Lead[], format: 'xlsx' | 'csv' | 'json') {
+export async function exportLeads(leads, format) {
   const rows = leads.map(flattenLead)
   const timestamp = new Date().toISOString().slice(0, 10)
 
@@ -89,10 +88,10 @@ export async function exportLeads(leads: Lead[], format: 'xlsx' | 'csv' | 'json'
   await writeWorkbook([{ name: 'Leads', rows }], `lead-enrichment-${timestamp}.xlsx`)
 }
 
-export async function exportDashboardReport(metrics: DashboardMetrics, leads: Lead[]) {
+export async function exportDashboardReport(metrics, leads) {
   await writeWorkbook(
     [
-      { name: 'Metrics', rows: [metrics as unknown as Record<string, unknown>] },
+      { name: 'Metrics', rows: [metrics] },
       { name: 'Pipeline', rows: leads.map(flattenLead) },
     ],
     `lead-dashboard-${new Date().toISOString().slice(0, 10)}.xlsx`,

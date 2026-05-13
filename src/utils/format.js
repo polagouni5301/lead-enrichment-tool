@@ -1,10 +1,8 @@
-import type { LeadStatus } from '../types/lead'
-
-export function formatPercent(value: number) {
+export function formatPercent(value) {
   return `${Math.round(value)}%`
 }
 
-export function formatDateTime(value: string) {
+export function formatDateTime(value) {
   return new Intl.DateTimeFormat('en', {
     month: 'short',
     day: 'numeric',
@@ -13,7 +11,7 @@ export function formatDateTime(value: string) {
   }).format(new Date(value))
 }
 
-export function normalizeDomain(value: string) {
+export function normalizeDomain(value) {
   return value
     .trim()
     .toLowerCase()
@@ -22,7 +20,7 @@ export function normalizeDomain(value: string) {
     .replace(/\/$/, '')
 }
 
-export function statusTone(status: LeadStatus) {
+export function statusTone(status) {
   if (status.includes('Failed')) return 'danger'
   if (status === 'Uploaded') return 'info'
   if (status === 'Exported') return 'orange'

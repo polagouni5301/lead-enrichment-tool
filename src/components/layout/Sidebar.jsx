@@ -5,14 +5,12 @@ import {
   DatabaseZap,
   Lock,
   UploadCloud,
-  type LucideIcon,
 } from 'lucide-react'
 import { useMemo } from 'react'
 import { useLeadStore } from '../../store/useLeadStore'
-import type { WorkflowStep } from '../../types/lead'
 import { cn } from '../../utils/cn'
 
-const navItems: Array<{ id: WorkflowStep; label: string; icon: LucideIcon }> = [
+const navItems = [
   { id: 'upload', label: 'Upload Leads', icon: UploadCloud },
   { id: 'lowEffort', label: 'Low Effort Enrichment', icon: BrainCircuit },
   { id: 'manual', label: 'Manual Validation', icon: CheckSquare },

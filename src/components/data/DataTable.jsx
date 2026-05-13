@@ -6,27 +6,14 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-  type ColumnDef,
-  type ExpandedState,
-  type SortingState,
 } from '@tanstack/react-table'
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronsUpDown, Search } from 'lucide-react'
-import { Fragment, useMemo, useState, type ReactNode } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { cn } from '../../utils/cn'
 
-type DataTableProps<TData> = {
-  data: TData[]
-  columns: ColumnDef<TData, unknown>[]
-  searchPlaceholder?: string
-  filterKey?: string
-  renderExpanded?: (row: TData) => ReactNode
-  pageSize?: number
-  compact?: boolean
-}
-
-export function DataTable<TData>({
+export function DataTable({
   data,
   columns,
   searchPlaceholder = 'Search records',
@@ -34,15 +21,15 @@ export function DataTable<TData>({
   renderExpanded,
   pageSize = 6,
   compact,
-}: DataTableProps<TData>) {
-  const [sorting, setSorting] = useState<SortingState>([])
+}) {
+  const [sorting, setSorting] = useState([])
   const [globalFilter, setGlobalFilter] = useState('')
-  const [expanded, setExpanded] = useState<ExpandedState>({})
+  const [expanded, setExpanded] = useState({})
 
   const tableColumns = useMemo(() => {
     if (!renderExpanded) return columns
 
-    const expander: ColumnDef<TData, unknown> = {
+    const expander = {
       id: 'expander',
       header: '',
       cell: ({ row }) => (
@@ -91,7 +78,7 @@ export function DataTable<TData>({
         return String(row.getValue(filterKey)).toLowerCase().includes(query)
       }
 
-      return Object.values(row.original as Record<string, unknown>).some((value) =>
+      return Object.values(row.original).some((value) =>
         String(value).toLowerCase().includes(query),
       )
     },

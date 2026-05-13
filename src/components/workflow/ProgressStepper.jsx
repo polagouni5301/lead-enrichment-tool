@@ -1,10 +1,9 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { CheckCircle2, CircleDot, Lock } from 'lucide-react'
 import { useLeadStore } from '../../store/useLeadStore'
-import type { WorkflowStep } from '../../types/lead'
 import { cn } from '../../utils/cn'
 
-const steps: Array<{ id: WorkflowStep; label: string; short: string }> = [
+const steps = [
   { id: 'upload', label: 'Upload Leads', short: 'Upload' },
   { id: 'lowEffort', label: 'Low Effort Enrichment', short: 'LLM Gate' },
   { id: 'manual', label: 'Manual Validation', short: 'Manual' },

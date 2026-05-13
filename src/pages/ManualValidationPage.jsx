@@ -1,4 +1,3 @@
-import type { ColumnDef } from '@tanstack/react-table'
 import { motion } from 'framer-motion'
 import { CheckCircle2, Clock3, FileCheck2, History, Save, ShieldX, UserCheck } from 'lucide-react'
 import { useMemo } from 'react'
@@ -12,14 +11,9 @@ import { Switch } from '../components/ui/switch'
 import { Textarea } from '../components/ui/textarea'
 import { StatusBadge } from '../components/workflow/StatusBadge'
 import { allManualChecksComplete, useLeadStore } from '../store/useLeadStore'
-import type { Lead, ManualChecks } from '../types/lead'
 import { formatDateTime } from '../utils/format'
 
-const checklist: Array<{
-  key: keyof ManualChecks
-  label: string
-  description: string
-}> = [
+const checklist = [
   {
     key: 'duplicateCheck',
     label: 'Duplicate check',
@@ -47,7 +41,7 @@ const checklist: Array<{
   },
 ]
 
-function checklistProgress(lead: Lead) {
+function checklistProgress(lead) {
   return (Object.values(lead.manualChecks).filter(Boolean).length / checklist.length) * 100
 }
 
@@ -76,7 +70,7 @@ export function ManualValidationPage() {
   const completedChecks = activeLead ? Object.values(activeLead.manualChecks).filter(Boolean).length : 0
   const completion = activeLead ? checklistProgress(activeLead) : 0
 
-  const columns = useMemo<ColumnDef<Lead, unknown>[]>(
+  const columns = useMemo(
     () => [
       {
         accessorKey: 'companyName',

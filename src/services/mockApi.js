@@ -1,4 +1,3 @@
-import type { Contact, EnrichmentResult, Lead, UploadLeadInput, ValidationCard } from '../types/lead'
 import { makeId, normalizeDomain } from '../utils/format'
 
 const enterpriseNames = ['carrefour', 'żabka', 'zabka', 'česká pošta', 'ceska posta', 'poste', 'tesco']
@@ -6,20 +5,20 @@ const marketplaceTerms = ['marketplace', 'aggregator', 'directory', 'booking', '
 const unrelatedServices = ['wixsite', 'squarespace', 'shopify', 'facebook', 'instagram', 'linkedin', 'google']
 const offlineTerms = ['offline', 'inactive', 'dead', 'localhost', 'example', 'test']
 
-const regionSignals: Record<string, { tlds: string[]; languages: string[] }> = {
+const regionSignals = {
   poland: { tlds: ['pl', 'com'], languages: ['Polish', 'English'] },
   czechia: { tlds: ['cz', 'com'], languages: ['Czech', 'English'] },
   france: { tlds: ['fr', 'com'], languages: ['French', 'English'] },
   germany: { tlds: ['de', 'com'], languages: ['German', 'English'] },
 }
 
-function wait(ms: number) {
+function wait(ms) {
   return new Promise((resolve) => window.setTimeout(resolve, ms))
 }
 
-export async function uploadLeadsApi(leads: UploadLeadInput[]) {
+export async function uploadLeadsApi(leads) {
   await wait(450)
-  return leads.map<Lead>((lead) => ({
+  return leads.map((lead) => ({
     ...lead,
     id: makeId('lead'),
     websiteDomainName: normalizeDomain(lead.websiteDomainName),
@@ -50,11 +49,7 @@ export async function uploadLeadsApi(leads: UploadLeadInput[]) {
   }))
 }
 
-export async function validateLeadApi(lead: Lead): Promise<{
-  status: 'Low Effort Validation Passed' | 'Low Effort Validation Failed'
-  category: 'DQ' | 'AISDR' | null
-  results: ValidationCard[]
-}> {
+export async function validateLeadApi(lead) {
   await wait(1500)
 
   const company = lead.companyName.toLowerCase()
@@ -74,14 +69,14 @@ export async function validateLeadApi(lead: Lead): Promise<{
     company.includes('unknown')
   const suspiciousEntity = company.includes('shell') || company.includes('placeholder') || company.includes('fake')
 
-  const stopCategory: 'DQ' | 'AISDR' | null =
+  const stopCategory =
     isEnterprise || marketplaceOrAggregator
       ? 'DQ'
       : websiteUnavailable || unrelatedService || domainMismatch || locationMismatch || missingSocialPresence || suspiciousEntity
         ? 'AISDR'
         : null
 
-  const results: ValidationCard[] = [
+  const results = [
     {
       id: makeId('val'),
       type: 'Company website',
@@ -175,7 +170,7 @@ export async function validateLeadApi(lead: Lead): Promise<{
   }
 }
 
-export async function enrichLeadApi(lead: Lead): Promise<EnrichmentResult> {
+export async function enrichLeadApi(lead) {
   await wait(1800)
 
   const domain = normalizeDomain(lead.emailDomainName)
@@ -189,7 +184,7 @@ export async function enrichLeadApi(lead: Lead): Promise<EnrichmentResult> {
         .join(' ')
     : `${firstName} Operator`
 
-  const contacts: Contact[] = [
+  const contacts = [
     {
       id: makeId('contact'),
       name: primaryName || 'No information found',
